@@ -1,6 +1,5 @@
 // ============================================================
 //  + Portafolios con menú contextual
-//  + Contador de días de demo (27/08/2026 – 11/09/2026)
 // ============================================================
 
 import { getModules, addModule, deleteModule, editModule, reorderModules, getCategories, addCategory, editCategory, deleteCategory, reorderCategories, getPortfolios, addPortfolio, editPortfolio, deletePortfolio } from './state.js';
@@ -168,108 +167,6 @@ async function initApp() {
     bindEvents();
     renderPortfoliosModal();
     updatePortfoliosVisibility();
-    // Contador de días de demo
-    updateDemoCounter();
-    setInterval(updateDemoCounter, 60000);
-  } catch (error) {
-    console.error('Error en inicialización:', error);
-    alert('No se pudo cargar la aplicación.');
-  }
-}
-
-// ============================================================
-//  CONTADOR DE DÍAS DE DEMO (27/08/2026 – 14/09/2026)
-// ============================================================
-function updateDemoCounter() {
-  const el = document.getElementById('demo-counter');
-  if (!el) return;
-
-  const now = new Date();
-  const start = new Date(2026, 7, 27); // 27 de agosto
-  const end = new Date(2026, 8, 14);   // 11 de septiembre
-
-  let days = 0;
-  if (now < start) {
-    days = 15;
-  } else if (now >= end) {
-    days = 0;
-  } else {
-    const diff = end - now;
-    days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    if (days < 0) days = 0;
-    if (days > 15) days = 15;
-  }
-
-  el.textContent = `Te quedan ${days} días de Demo`;
-}
-
-async function loadData() {
-  currentCategories = await getCategories();
-  currentModules = await getModules();
-  currentPortfolios = await getPortfolios();
-  if (currentCategories.length > 0) {
-    const firstCatId = currentCategories[0].id;
-    for (const mod of currentModules) {
-      if (!mod.category_id) mod.category_id = firstCatId;
-    }
-  }
-  populateCategorySelect();
-  populateEditCategorySelect();
-}
-
-function populateCategorySelect() {
-  moduleCategorySelect.innerHTML = '';
-  currentCategories.forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat.id;
-    opt.textContent = cat.name;
-    moduleCategorySelect.appendChild(opt);
-  });
-}
-
-function populateEditCategorySelect() {
-  editModuleCategory.innerHTML = '';
-  currentCategories.forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat.id;
-    opt.textContent = cat.name;
-    editModuleCategory.appendChild(opt);
-  });
-}
-
-function bindEvents() {
-  modulesContainer.addEventListener('change', onModuleCheckChange);
-  currencySelect.addEventListener('change', onCurrencyChange);
-  toggleModeBtn.addEventListener('click', onToggleMode);
-  addModuleForm.addEventListener('submit', onAddModule);
-  quoteActionBtn.addEventListener('click', onQuoteAction);
-  dialogConfirm.addEventListener('click', onDialogConfirm);
-  dialogCancel.addEventListener('click', () => clientDialog.close());
-
-  portfoliosOpenBtn.addEventListener('click', openPortfoliosDialog);
-  portfoliosDialogClose.addEventListener('click', closePortfoliosDialog);
-
-  ratesToggleBtn.addEventListener('click', openRatesDialog);
-  ratesDialogClose.addEventListener('click', closeRatesDialog);
-  ratesDialogCancel.addEventListener('click', closeRatesDialog);
-  ratesDialogSave.addEventListener('click', onSaveRates);
-  ratesDialogReset.addEventListener('click', onResetRates);
-
-  editModuleSave.addEventListener('click', saveEditModule);
-  editModuleCancel.addEventListener('click', () => editModuleDialog.close());
-
-  // Cerrar menú contextual al hacer clic fuera
-  document.addEventListener('click', (e) => {
-    if (openContextMenuId) {
-      const menu = document.querySelector(`.pf-context-menu[data-id="${openContextMenuId}"]`);
-      const button = document.querySelector(`.pf-button[data-id="${openContextMenuId}"]`);
-      if (menu && !menu.contains(e.target) && button && !button.contains(e.target)) {
-        closeContextMenu();
-      }
-    }
-  });
-}
-
 // ============================================================
 //  RENDER Y MODO EDICIÓN
 // ============================================================
