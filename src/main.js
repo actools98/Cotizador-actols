@@ -1,7 +1,4 @@
-// ============================================================
-//  + Portafolios con menú contextual
-// ============================================================
-
+// main.js (sin demo, solo funcionalidad)
 import { getModules, addModule, deleteModule, editModule, reorderModules, getCategories, addCategory, editCategory, deleteCategory, reorderCategories, getPortfolios, addPortfolio, editPortfolio, deletePortfolio } from './state.js';
 import { calculateTotal, getSelectedModules } from './components/quoteCalculator.js';
 import { fetchExchangeRates, convertCurrency, startAutoRefresh, saveManualRates, getCurrentRates } from './components/currencyConverter.js';
@@ -13,7 +10,7 @@ import Sortable from 'sortablejs';
 // ============================================================
 //  AUTENTICACIÓN
 // ============================================================
-const PASSWORD = 'AC98';
+const PASSWORD = 'BN99';
 const loginOverlay = document.getElementById('login-overlay');
 const appWrapper = document.getElementById('app-wrapper');
 const passwordInput = document.getElementById('password-input');
@@ -100,49 +97,7 @@ const editModuleSave = document.getElementById('edit-module-save');
 const editModuleCancel = document.getElementById('edit-module-cancel');
 
 let currentEditingModuleId = null;
-// ============================================================
-//  BOTONES PARA COLAPSAR/EXPANDIR TODO (OPCIONAL)
-// ============================================================
-function addCollapseButtons() {
-  const modulesContainer = document.getElementById('modules-container');
-  if (!modulesContainer) return;
-  
-  if (document.getElementById('collapse-controls')) return;
-  
-  const controls = document.createElement('div');
-  controls.id = 'collapse-controls';
-  controls.style.display = 'flex';
-  controls.style.gap = 'var(--space-sm)';
-  controls.style.marginBottom = 'var(--space-md)';
-  controls.style.justifyContent = 'flex-end';
-  
-  const collapseBtn = document.createElement('button');
-  collapseBtn.className = 'btn btn-secondary';
-  collapseBtn.textContent = 'Colapsar todo';
-  collapseBtn.addEventListener('click', async () => {  // ← AGREGAR 'async'
-    const { collapseAllModules } = await import('./utils/domHelpers.js');
-    collapseAllModules();
-    document.querySelectorAll('.module-card:not(.admin-mode) .module-toggle').forEach(toggle => {
-      toggle.classList.add('collapsed');
-    });
-  });
-  
-  const expandBtn = document.createElement('button');
-  expandBtn.className = 'btn btn-secondary';
-  expandBtn.textContent = 'Expandir todo';
-  expandBtn.addEventListener('click', async () => {   // ← AGREGAR 'async'
-    const { expandAllModules } = await import('./utils/domHelpers.js');
-    expandAllModules();
-    document.querySelectorAll('.module-card:not(.admin-mode) .module-toggle').forEach(toggle => {
-      toggle.classList.remove('collapsed');
-    });
-  });
-  
-  controls.appendChild(collapseBtn);
-  controls.appendChild(expandBtn);
-  
-  modulesContainer.parentNode.insertBefore(controls, modulesContainer);
-}
+
 // ============================================================
 //  ESTADO
 // ============================================================
@@ -153,7 +108,7 @@ let currentCurrency = 'COP';
 let currentCheckedIds = new Set();
 let isEditMode = false;
 let sortableInstances = [];
-let openContextMenuId = null; // ID del portafolio cuyo menú está abierto
+let openContextMenuId = null;
 
 // ============================================================
 //  INICIALIZACIÓN
@@ -167,6 +122,78 @@ async function initApp() {
     bindEvents();
     renderPortfoliosModal();
     updatePortfoliosVisibility();
+  } catch (error) {
+    console.error('Error en inicialización:', error);
+    alert('No se pudo cargar la aplicación.');
+  }
+}
+
+async function loadData() {
+  currentCategories = await getCategories();
+  currentModules = await getModules();
+  currentPortfolios = await getPortfolios();
+  if (currentCategories.length > 0) {
+    const firstCatId = currentCategories[0].id;
+    for (const mod of currentModules) {
+      if (!mod.category_id) mod.category_id = firstCatId;
+    }
+  }
+  populateCategorySelect();
+  populateEditCategorySelect();
+}
+
+function populateCategorySelect() {
+  moduleCategorySelect.innerHTML = '';
+  currentCategories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.name;
+    moduleCategorySelect.appendChild(opt);
+  });
+}
+
+function populateEditCategorySelect() {
+  editModuleCategory.innerHTML = '';
+  currentCategories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.name;
+    editModuleCategory.appendChild(opt);
+  });
+}
+
+function bindEvents() {
+  modulesContainer.addEventListener('change', onModuleCheckChange);
+  currencySelect.addEventListener('change', onCurrencyChange);
+  toggleModeBtn.addEventListener('click', onToggleMode);
+  addModuleForm.addEventListener('submit', onAddModule);
+  quoteActionBtn.addEventListener('click', onQuoteAction);
+  dialogConfirm.addEventListener('click', onDialogConfirm);
+  dialogCancel.addEventListener('click', () => clientDialog.close());
+
+  portfoliosOpenBtn.addEventListener('click', openPortfoliosDialog);
+  portfoliosDialogClose.addEventListener('click', closePortfoliosDialog);
+
+  ratesToggleBtn.addEventListener('click', openRatesDialog);
+  ratesDialogClose.addEventListener('click', closeRatesDialog);
+  ratesDialogCancel.addEventListener('click', closeRatesDialog);
+  ratesDialogSave.addEventListener('click', onSaveRates);
+  ratesDialogReset.addEventListener('click', onResetRates);
+
+  editModuleSave.addEventListener('click', saveEditModule);
+  editModuleCancel.addEventListener('click', () => editModuleDialog.close());
+
+  document.addEventListener('click', (e) => {
+    if (openContextMenuId) {
+      const menu = document.querySelector(`.pf-context-menu[data-id="${openContextMenuId}"]`);
+      const button = document.querySelector(`.pf-button[data-id="${openContextMenuId}"]`);
+      if (menu && !menu.contains(e.target) && button && !button.contains(e.target)) {
+        closeContextMenu();
+      }
+    }
+  });
+}
+
 // ============================================================
 //  RENDER Y MODO EDICIÓN
 // ============================================================
@@ -282,7 +309,7 @@ function destroySortable() {
 }
 
 // ============================================================
-//  CRUD: MÓDULOS - MODIFICADO PARA ACEPTAR PRECIO 0
+//  CRUD: MÓDULOS
 // ============================================================
 async function onAddModule(e) {
   e.preventDefault();
@@ -408,16 +435,15 @@ async function handleDeleteCategory(id) {
 }
 
 // ============================================================
-//  PORTAFOLIOS - CON MENÚ CONTEXTUAL Y FORMULARIO
+//  PORTAFOLIOS (con menú contextual)
 // ============================================================
-
 function openPortfoliosDialog() {
   renderPortfoliosModal();
   portfoliosDialog.showModal();
 }
 
 function closePortfoliosDialog() {
-  closeContextMenu(); // cerrar menú si estaba abierto
+  closeContextMenu();
   portfoliosDialog.close();
 }
 
@@ -425,7 +451,6 @@ function renderPortfoliosModal() {
   if (!portfoliosListModal) return;
   portfoliosListModal.innerHTML = '';
 
-  // --- Lista de portafolios como botones ---
   if (!currentPortfolios || currentPortfolios.length === 0) {
     const emptyMsg = document.createElement('p');
     emptyMsg.textContent = 'No hay portafolios. Agrega uno.';
@@ -438,7 +463,6 @@ function renderPortfoliosModal() {
       wrapper.style.position = 'relative';
       wrapper.style.marginBottom = '8px';
 
-      // Botón principal
       const btn = document.createElement('button');
       btn.className = 'pf-button';
       btn.dataset.id = pf.id;
@@ -469,7 +493,6 @@ function renderPortfoliosModal() {
         toggleContextMenu(pf.id);
       });
 
-      // Menú contextual
       const menu = document.createElement('div');
       menu.className = 'pf-context-menu';
       menu.dataset.id = pf.id;
@@ -526,7 +549,7 @@ function renderPortfoliosModal() {
     });
   }
 
-  // --- Formulario para agregar ---
+  // Formulario para agregar
   const addForm = document.createElement('div');
   addForm.style.marginTop = '16px';
   addForm.style.paddingTop = '16px';
@@ -582,7 +605,6 @@ function renderPortfoliosModal() {
     await onAddPortfolio(name, link);
     nameInput.value = '';
     linkInput.value = '';
-    // Re-renderizar
     renderPortfoliosModal();
   });
 
@@ -590,13 +612,12 @@ function renderPortfoliosModal() {
   portfoliosListModal.appendChild(addForm);
 }
 
-// Funciones auxiliares del menú contextual
 function toggleContextMenu(id) {
   if (openContextMenuId === id) {
     closeContextMenu();
     return;
   }
-  closeContextMenu(); // cerrar cualquier otro abierto
+  closeContextMenu();
   const menu = document.querySelector(`.pf-context-menu[data-id="${id}"]`);
   if (menu) {
     menu.style.display = 'block';
@@ -616,7 +637,6 @@ function copyLink(link) {
   navigator.clipboard.writeText(link).then(() => {
     alert('Enlace copiado al portapapeles');
   }).catch(() => {
-    // Fallback
     const textarea = document.createElement('textarea');
     textarea.value = link;
     document.body.appendChild(textarea);
