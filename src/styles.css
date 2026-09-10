@@ -1,26 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 /* ============================================================
-   Design Tokens — Tema "Lienxo" (editorial claro)
-   Inspirado en el portafolio: fondo crema, líneas finas,
-   tipografía Outfit (moderna y limpia).
+   Design Tokens — Tema oscuro personalizado
    ============================================================ */
 :root {
-  --color-bg-main: #FBFAF8;         /* blanco cálido, casi blanco */
-  --color-bg-surface: #FFFFFF;      /* superficies (cards, sidebar) */
-  --color-text-primary: #2B2A28;    /* casi negro cálido */
-  --color-text-secondary: #7A756C;  /* gris cálido */
-  --color-border: #E1DDD3;          /* línea fina crema-gris */
+  --color-bg-main: #121212;         /* fondo principal */
+  --color-bg-surface: #1E1E1E;      /* superficies (cards, sidebar) */
+  --color-text-primary: #FFFFFF;    /* texto principal */
+  --color-text-secondary: #AAAAAA;  /* texto secundario */
+  --color-border: #333333;          /* bordes */
 
-  --color-primary: #2B2A28;         /* negro cálido, actúa como acento */
-  --color-primary-hover: #4A4640;
-  --color-primary-muted: #F1EEE6;   /* fondo suave para selección */
-  --color-success: #6B8F71;         /* verde apagado */
-  --color-danger: #B5675A;          /* terracota apagado */
+  --color-primary: #0B4F5C;         /* acento (logos, botones) */
+  --color-primary-hover: #0D6B7A;
+  --color-primary-muted: #1A3A40;   /* fondo de selección */
+
+  --color-success: #6B8F71;
+  --color-danger: #B5675A;
 
   --font-sans: 'Outfit', 'Helvetica Neue', Arial, sans-serif;
-  --font-serif: 'Outfit', Georgia, serif;    /* Usamos Outfit también para títulos */
-  --font-mono: 'Outfit', 'JetBrains Mono', monospace; /* Opcional, mantén mono si prefieres */
+  --font-serif: 'Outfit', Georgia, serif;
+  --font-mono: 'Outfit', 'JetBrains Mono', monospace;
 
   --text-h1: 2.4rem;
   --text-h2: 1.6rem;
@@ -37,7 +36,7 @@
   --radius-sm: 2px;
   --radius-md: 2px;
   --shadow-card: none;
-  --shadow-floating: 0 8px 24px -8px rgba(43, 42, 40, 0.18);
+  --shadow-floating: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
 }
 
 /* ============================================================
@@ -52,8 +51,8 @@
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg-main);
-  /* grano de papel orgánico (ruido feTurbulence), no una grilla repetitiva */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.16  0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Mantengo el mismo grano de papel, pero adaptado a fondo oscuro */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.07  0 0 0 0 0.07  0 0 0 0 0.07  0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   color: var(--color-text-primary);
   line-height: 1.6;
@@ -119,7 +118,7 @@ header {
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-text-primary);
+  color: #0B4F5C; /* color específico del logo */
   line-height: 1;
   text-transform: lowercase;
 }
@@ -754,7 +753,7 @@ header {
 }
 
 #client-dialog::backdrop {
-  background-color: rgba(43, 42, 40, 0.45);
+  background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(3px);
 }
 
@@ -1013,7 +1012,7 @@ dialog {
   margin: 0;
 }
 dialog::backdrop {
-  background-color: rgba(43, 42, 40, 0.45);
+  background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(3px);
 }
 .dialog-header {
@@ -1475,7 +1474,6 @@ dialog::backdrop {
     flex: 1 1 60%;
     min-width: 0;
     margin-left: var(--space-xs);
-    /* Permitimos que el texto ocupe varias líneas si es necesario */
     white-space: normal;
     word-break: break-word;
   }
