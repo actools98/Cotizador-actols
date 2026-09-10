@@ -12,45 +12,6 @@ import { formatCurrency } from './utils/formatters.js';
 import Sortable from 'sortablejs';
 
 // ============================================================
-//  CONTROL DE DEMO (expirada o no)
-// ============================================================
-const DEMO_END = new Date(2026, 8, 14); // 11 de septiembre de 2026
-const FORCE_EXPIRED_KEY = 'actols_force_expired';
-
-function isDemoExpired() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const forceParam = urlParams.get('force_expired');
-
-  // Caso 1: force_expired=false -> desactivar expiración forzada y recargar sin parámetros
-  if (forceParam === 'false') {
-    localStorage.removeItem(FORCE_EXPIRED_KEY);
-    // Si hay parámetros en la URL, los eliminamos todos para recargar limpio
-    if (window.location.search) {
-      const cleanUrl = window.location.pathname;
-      window.location.replace(cleanUrl);
-      return false; // no se ejecutará porque la página se recarga
-    }
-    // Si no había parámetros, simplemente devolvemos false (no expirado)
-    return false;
-  }
-
-  // Caso 2: force_expired=true -> forzar expiración y guardar en localStorage
-  if (forceParam === 'true') {
-    localStorage.setItem(FORCE_EXPIRED_KEY, 'true');
-    return true;
-  }
-
-  // Caso 3: flag en localStorage (persistente)
-  if (localStorage.getItem(FORCE_EXPIRED_KEY) === 'true') {
-    return true;
-  }
-
-  // Caso 4: fecha actual >= fecha de fin
-  const now = new Date();
-  return now >= DEMO_END;
-}
-
-// ============================================================
 //  AUTENTICACIÓN
 // ============================================================
 const PASSWORD = 'AC98';
